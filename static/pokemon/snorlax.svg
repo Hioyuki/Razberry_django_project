@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="28" fill="#bfdbfe"/>
+  <ellipse cx="120" cy="132" rx="78" ry="68" fill="#334155"/>
+  <ellipse cx="120" cy="142" rx="52" ry="42" fill="#f8fafc"/>
+  <circle cx="96" cy="110" r="7" fill="#111827"/>
+  <circle cx="144" cy="110" r="7" fill="#111827"/>
+  <path d="M102 136c10 8 26 8 36 0" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+  <path d="M86 72l-18-18 30 4" fill="#334155"/>
+  <path d="M154 72l18-18-30 4" fill="#334155"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="sans-serif" fill="#111827">カビゴン</text>
+</svg>

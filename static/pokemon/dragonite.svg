@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="28" fill="#fed7aa"/>
+  <ellipse cx="120" cy="132" rx="74" ry="66" fill="#fb923c"/>
+  <ellipse cx="120" cy="142" rx="44" ry="38" fill="#fef3c7"/>
+  <circle cx="96" cy="112" r="7" fill="#111827"/>
+  <circle cx="144" cy="112" r="7" fill="#111827"/>
+  <path d="M104 146c8 8 24 8 32 0" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+  <path d="M88 92c-18-12-18-30 0-34 10 8 14 18 12 30z" fill="#a7f3d0"/>
+  <path d="M152 92c18-12 18-30 0-34-10 8-14 18-12 30z" fill="#a7f3d0"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="sans-serif" fill="#111827">カイリュー</text>
+</svg>

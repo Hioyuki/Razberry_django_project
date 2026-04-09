@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InsightFace 顔検出デモ</title>
+  <style>
+    :root {
+      --bg-1: #f3f7f0;
+      --bg-2: #f7e8db;
+      --ink: #1f2933;
+      --line: rgba(31, 41, 51, 0.12);
+      --card: rgba(255, 255, 255, 0.8);
+      --primary: #0f766e;
+      --danger: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "M PLUS 1p", "Hiragino Sans", "Yu Gothic", sans-serif;
+      background:
+        radial-gradient(circle at top left, #d9f99d 0%, transparent 28%),
+        radial-gradient(circle at bottom right, #fdba74 0%, transparent 32%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 34px 18px 48px;
+    }
+
+    .hero,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .hero {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1.06;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 65ch;
+      line-height: 1.8;
+      opacity: 0.92;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .muted {
+      margin: 0;
+      line-height: 1.7;
+      opacity: 0.8;
+    }
+
+    .upload {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed rgba(15, 118, 110, 0.35);
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      font: inherit;
+    }
+
+    select {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      font: inherit;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: progress;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(15, 118, 110, 0.08);
+      color: #0b4f49;
+      line-height: 1.6;
+      min-height: 52px;
+      white-space: pre-wrap;
+    }
+
+    .status.error {
+      background: rgba(185, 28, 28, 0.1);
+      color: var(--danger);
+    }
+
+    .preview {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .frame {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.9);
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .frame img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .frame video {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      background: #111827;
+    }
+
+    .placeholder {
+      padding: 28px;
+      text-align: center;
+      line-height: 1.8;
+      opacity: 0.62;
+    }
+
+    .placeholder.hidden {
+      display: none;
+    }
+
+    .countdown {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(15, 23, 42, 0.22);
+      color: white;
+      font-size: clamp(64px, 16vw, 120px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      z-index: 2;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .results {
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .results li {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      line-height: 1.6;
+    }
+
+    .pokemon-card {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .pokemon-card img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .pokemon-name {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .pokemon-comment {
+      margin: 10px 0 0;
+      line-height: 1.8;
+    }
+
+    .pokemon-meta {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(15, 118, 110, 0.08);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .analysis-card {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .analysis-summary {
+      margin: 10px 0 14px;
+      line-height: 1.8;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .analysis-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(248, 250, 252, 0.95);
+      line-height: 1.7;
+    }
+
+    .analysis-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .steps {
+      margin: 16px 0 0;
+      padding-left: 20px;
+      line-height: 1.9;
+    }
+
+    code {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 0.95em;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .shell {
+        padding: 24px 14px 36px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+
+      .pokemon-card {
+        grid-template-columns: 1fr;
+      }
+
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Raspberry Pi 5 / InsightFace / Django</div>
+      <h1>画像アップロードで顔検出と人物照合を試せるデモ</h1>
+      <p class="lead">
+        登録済み顔画像データベースと照合しながら、顔位置・ランドマーク・推定人物名をまとめて返します。
+      </p>
+      <div class="chips">
+        <span class="chip">静止画アップロード</span>
+        <span class="chip">InsightFace 埋め込み比較</span>
+        <span class="chip">Unknown 判定対応</span>
+        <span class="chip">CDN 不要</span>
+      </div>
+    </section>
+
+    <section class="layout">
+      <section class="panel">
+        <h2>顔検出を実行</h2>
+        <p class="muted">
+          JPEG または PNG をアップロードすると、サーバー側で顔検出と人物照合を行います。
+          登録画像は <code>known_faces/人物名/画像.jpg</code> の構成を使います。
+        </p>
+
+        <div class="upload">
+          <input id="file-input" type="file" accept="image/*" />
+          <select id="feature-mode">
+            <option value="pokemon">似ているポケモンを表示</option>
+            <option value="local-face-analysis">無料の顔特徴分析を表示</option>
+          </select>
+          <div class="button-row">
+            <button id="analyze-button" class="btn-primary" type="button">顔検出を開始</button>
+            <button id="reset-button" class="btn-secondary" type="button">リセット</button>
+          </div>
+          <div id="status" class="status">待機中: 画像を選んで顔検出を実行してください。</div>
+        </div>
+
+        <div class="preview">
+          <div class="frame">
+            <img id="preview-image" alt="アップロード画像のプレビュー" hidden />
+            <div id="preview-placeholder" class="placeholder">ここにアップロード画像のプレビューが表示されます。</div>
+          </div>
+        </div>
+
+        <div class="preview">
+          <div class="upload">
+            <div class="muted">ライブ映像を見ながら Raspberry Pi カメラで撮影し、そのまま解析できます。</div>
+            <div class="button-row">
+              <button id="start-preview-button" class="btn-secondary" type="button">ライブ開始</button>
+              <button id="stop-preview-button" class="btn-secondary" type="button">ライブ停止</button>
+              <button id="capture-pi-button" class="btn-primary" type="button">ラズパイカメラで撮影して解析</button>
+            </div>
+          </div>
+          <div class="frame">
+            <img id="camera-stream" alt="Raspberry Pi カメラのライブ映像" hidden />
+            <div id="countdown-overlay" class="countdown" hidden></div>
+            <div id="camera-placeholder" class="placeholder hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>セットアップメモ</h2>
+        <p class="muted">
+          まずは登録顔データを配置してください。登録画像が空だと照合はできません。
+        </p>
+        <ol class="steps">
+          <li>顔認証デモは <code>http://127.0.0.1:8000/</code> または <code>http://localhost:8000/</code> で開いてください</li>
+          <li><code>known_faces/Alice/alice_01.jpg</code> のように人物ごとのフォルダを作る</li>
+          <li>無料の顔特徴分析モードはローカル実行なので追加課金はありません</li>
+          <li>判定したい画像をこの画面から選ぶ</li>
+          <li>顔検出を開始して結果を確認する</li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="panel" style="margin-top: 18px;">
+      <h2>解析結果</h2>
+      <p class="muted">検出後は、描画済み画像と各顔の推定結果を表示します。</p>
+      <div class="layout" style="margin-top: 16px;">
+        <div class="frame">
+          <img id="result-image" alt="顔検出結果" hidden />
+          <div id="result-placeholder" class="placeholder">解析後の画像がここに表示されます。</div>
+        </div>
+        <div>
+          <ul id="results-list" class="results" hidden></ul>
+          <div id="pokemon-card" class="pokemon-card" hidden>
+            <img id="pokemon-image" alt="似ているポケモン画像" />
+            <div>
+              <p class="muted">似ているポケモン</p>
+              <h3 id="pokemon-name" class="pokemon-name"></h3>
+              <div id="pokemon-types" class="chips"></div>
+              <p id="pokemon-comment" class="pokemon-comment"></p>
+              <div id="pokemon-meta" class="pokemon-meta" hidden></div>
+            </div>
+          </div>
+          <div id="face-analysis-card" class="analysis-card" hidden>
+            <p class="muted">無料のローカル顔特徴分析</p>
+            <h3 id="face-analysis-title" class="pokemon-name">顔特徴分析</h3>
+            <p id="face-analysis-summary" class="analysis-summary"></p>
+            <div id="face-analysis-grid" class="analysis-grid"></div>
+            <div id="face-analysis-meta" class="pokemon-meta" hidden></div>
+          </div>
+          <div id="results-placeholder" class="placeholder">まだ解析結果はありません。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.getElementById("file-input");
+    const featureModeSelect = document.getElementById("feature-mode");
+    const analyzeButton = document.getElementById("analyze-button");
+    const resetButton = document.getElementById("reset-button");
+    const statusBox = document.getElementById("status");
+    const previewImage = document.getElementById("preview-image");
+    const previewPlaceholder = document.getElementById("preview-placeholder");
+    const resultImage = document.getElementById("result-image");
+    const resultPlaceholder = document.getElementById("result-placeholder");
+    const resultsList = document.getElementById("results-list");
+    const resultsPlaceholder = document.getElementById("results-placeholder");
+    const pokemonCard = document.getElementById("pokemon-card");
+    const pokemonImage = document.getElementById("pokemon-image");
+    const pokemonName = document.getElementById("pokemon-name");
+    const pokemonTypes = document.getElementById("pokemon-types");
+    const pokemonComment = document.getElementById("pokemon-comment");
+    const pokemonMeta = document.getElementById("pokemon-meta");
+    const faceAnalysisCard = document.getElementById("face-analysis-card");
+    const faceAnalysisTitle = document.getElementById("face-analysis-title");
+    const faceAnalysisSummary = document.getElementById("face-analysis-summary");
+    const faceAnalysisGrid = document.getElementById("face-analysis-grid");
+    const faceAnalysisMeta = document.getElementById("face-analysis-meta");
+    const capturePiButton = document.getElementById("capture-pi-button");
+    const startPreviewButton = document.getElementById("start-preview-button");
+    const stopPreviewButton = document.getElementById("stop-preview-button");
+    const cameraStream = document.getElementById("camera-stream");
+    const cameraPlaceholder = document.getElementById("camera-placeholder");
+    const countdownOverlay = document.getElementById("countdown-overlay");
+
+    let selectedFile = null;
+    let previewUrl = "";
+    let previewActive = false;
+    let countdownRunning = false;
+
+    function setStatus(message, isError) {
+      statusBox.textContent = message;
+      statusBox.classList.toggle("error", Boolean(isError));
+    }
+
+    function clearResults() {
+      resultImage.hidden = true;
+      resultImage.removeAttribute("src");
+      resultPlaceholder.hidden = false;
+      resultsList.hidden = true;
+      resultsList.innerHTML = "";
+      pokemonCard.hidden = true;
+      pokemonImage.removeAttribute("src");
+      pokemonName.textContent = "";
+      pokemonTypes.innerHTML = "";
+      pokemonComment.textContent = "";
+      pokemonMeta.textContent = "";
+      pokemonMeta.hidden = true;
+      faceAnalysisCard.hidden = true;
+      faceAnalysisSummary.textContent = "";
+      faceAnalysisGrid.innerHTML = "";
+      faceAnalysisMeta.textContent = "";
+      faceAnalysisMeta.hidden = true;
+      resultsPlaceholder.hidden = false;
+    }
+
+    function setBusyState(isBusy) {
+      analyzeButton.disabled = isBusy;
+      resetButton.disabled = isBusy;
+      capturePiButton.disabled = isBusy;
+      startPreviewButton.disabled = isBusy;
+      stopPreviewButton.disabled = isBusy;
+      featureModeSelect.disabled = isBusy;
+    }
+
+    function getSelectedFeatureMode() {
+      return featureModeSelect.value || "pokemon";
+    }
+
+    function renderPokemonResult(pokemon) {
+      const sourceLabel = pokemon.source === "pokeapi" ? "PokeAPI" : "ローカルフォールバック";
+      pokemonName.textContent = pokemon.name || "";
+      pokemonComment.textContent = (pokemon.comment || "") + " [" + sourceLabel + "]";
+      if (pokemon.source_detail) {
+        pokemonMeta.textContent = "取得詳細: " + pokemon.source_detail;
+        pokemonMeta.hidden = false;
+      } else {
+        pokemonMeta.textContent = "";
+        pokemonMeta.hidden = true;
+      }
+      pokemonTypes.innerHTML = "";
+      (pokemon.types || []).forEach((typeName) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = typeName;
+        pokemonTypes.appendChild(chip);
+      });
+      if (pokemon.image_url) {
+        pokemonImage.src = pokemon.image_url;
+      } else {
+        pokemonImage.removeAttribute("src");
+      }
+      pokemonCard.hidden = false;
+      faceAnalysisCard.hidden = true;
+      resultsPlaceholder.hidden = true;
+    }
+
+    function addAnalysisItem(label, value) {
+      if (!value) {
+        return;
+      }
+      const item = document.createElement("div");
+      item.className = "analysis-item";
+      item.innerHTML = "<strong>" + label + "</strong>" + value;
+      faceAnalysisGrid.appendChild(item);
+    }
+
+    function renderFaceAnalysisResult(analysis) {
+      const primaryFace = analysis.primary_face;
+      faceAnalysisTitle.textContent = "顔特徴分析";
+      faceAnalysisSummary.textContent = analysis.summary || "ローカル顔特徴分析の結果です。";
+      faceAnalysisGrid.innerHTML = "";
+
+      if (analysis.error) {
+        faceAnalysisMeta.textContent = analysis.error;
+        faceAnalysisMeta.hidden = false;
+      } else {
+        faceAnalysisMeta.textContent = "";
+        faceAnalysisMeta.hidden = true;
+      }
+
+      if (primaryFace) {
+        addAnalysisItem("検出顔数", String(analysis.face_count || 0));
+        addAnalysisItem("推定年齢", primaryFace.estimated_age ? String(primaryFace.estimated_age) + " 歳前後" : "");
+        addAnalysisItem(
+          "見た目傾向",
+          primaryFace.estimated_gender || ""
+        );
+      }
+
+      pokemonCard.hidden = true;
+      faceAnalysisCard.hidden = false;
+      resultsPlaceholder.hidden = true;
+    }
+
+    function startPiPreview() {
+      cameraStream.src = "/api/pi-camera-stream/?t=" + Date.now();
+      cameraStream.hidden = false;
+      cameraPlaceholder.classList.add("hidden");
+      previewActive = true;
+    }
+
+    function stopPiPreview() {
+      cameraStream.hidden = true;
+      cameraStream.removeAttribute("src");
+      cameraPlaceholder.classList.add("hidden");
+      previewActive = false;
+    }
+
+    async function runCountdown(seconds) {
+      countdownRunning = true;
+      countdownOverlay.hidden = false;
+
+      for (let value = seconds; value >= 1; value -= 1) {
+        countdownOverlay.textContent = String(value);
+        setStatus("撮影まで " + value + " 秒です。顔を中央でキープしてください。", false);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      countdownOverlay.textContent = "";
+      countdownOverlay.hidden = true;
+      countdownRunning = false;
+    }
+
+    function renderAnalysisResult(payload, successMessage) {
+      resultImage.src = "data:image/jpeg;base64," + payload.annotated_image_base64;
+      resultImage.hidden = false;
+      resultPlaceholder.hidden = true;
+
+      resultsList.innerHTML = "";
+      const matches = Array.isArray(payload.matches) ? payload.matches : [];
+      if (matches.length) {
+        matches.forEach((match, index) => {
+          const item = document.createElement("li");
+          item.innerHTML =
+            "<strong>Face " + (index + 1) + "</strong><br>" +
+            "名前: " + (match.name || "Unknown") + "<br>" +
+            "類似度: " + Number(match.score || 0).toFixed(3) + "<br>" +
+            "BBox: [" + (match.bbox || []).join(", ") + "]";
+          resultsList.appendChild(item);
+        });
+        resultsList.hidden = false;
+        resultsPlaceholder.hidden = true;
+      } else {
+          resultsList.hidden = true;
+          resultsPlaceholder.hidden = false;
+      }
+
+      const auxiliaryResult = payload.auxiliary_result;
+      if (auxiliaryResult && auxiliaryResult.kind === "pokemon") {
+        renderPokemonResult(auxiliaryResult);
+      } else if (auxiliaryResult && auxiliaryResult.kind === "local-face-analysis") {
+        renderFaceAnalysisResult(auxiliaryResult);
+      } else {
+        pokemonCard.hidden = true;
+        faceAnalysisCard.hidden = true;
+      }
+
+      setStatus(successMessage, false);
+    }
+
+    async function analyzeBlob(blob, filename) {
+      setBusyState(true);
+      clearResults();
+      setStatus("解析中: InsightFace で顔検出と照合を実行しています。", false);
+
+      const formData = new FormData();
+      formData.append("image", blob, filename);
+      formData.append("feature_mode", getSelectedFeatureMode());
+
+      try {
+        const response = await fetch("/api/analyze-face/", {
+          method: "POST",
+          body: formData,
+        });
+        const rawText = await response.text();
+        let payload = {};
+
+        if (rawText) {
+          try {
+            payload = JSON.parse(rawText);
+          } catch {
+            payload = { error: rawText.slice(0, 400) };
+          }
+        } else {
+          payload = { error: "サーバーから空のレスポンスが返りました。" };
+        }
+
+        if (!response.ok) {
+          throw new Error(payload.error || "解析に失敗しました。");
+        }
+
+        renderAnalysisResult(payload, "解析完了: " + payload.face_count + " 人の顔を検出しました。");
+      } catch (error) {
+        clearResults();
+        setStatus(error && error.message ? error.message : "解析に失敗しました。", true);
+      } finally {
+        setBusyState(false);
+      }
+    }
+
+    function resetAll() {
+      setBusyState(false);
+      selectedFile = null;
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = "";
+      }
+      fileInput.value = "";
+      previewImage.hidden = true;
+      previewImage.removeAttribute("src");
+      previewPlaceholder.hidden = false;
+      stopPiPreview();
+      clearResults();
+      setStatus("待機中: 画像を選んで顔検出を実行してください。", false);
+    }
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      selectedFile = file;
+      clearResults();
+
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = "";
+      }
+
+      if (!file) {
+        previewImage.hidden = true;
+        previewImage.removeAttribute("src");
+        previewPlaceholder.hidden = false;
+        setStatus("待機中: 画像を選んで顔検出を実行してください。", false);
+        return;
+      }
+
+      previewUrl = URL.createObjectURL(file);
+      previewImage.src = previewUrl;
+      previewImage.hidden = false;
+      previewPlaceholder.hidden = true;
+      setStatus("画像を選択しました: " + file.name, false);
+    });
+
+    resetButton.addEventListener("click", resetAll);
+    startPreviewButton.addEventListener("click", () => {
+      startPiPreview();
+      setStatus("ラズパイカメラのライブ映像を表示中です。", false);
+    });
+
+    stopPreviewButton.addEventListener("click", () => {
+      stopPiPreview();
+      setStatus("ラズパイカメラのライブ映像を停止しました。", false);
+    });
+
+    analyzeButton.addEventListener("click", async () => {
+      if (!selectedFile) {
+        setStatus("先に画像ファイルを選択してください。", true);
+        return;
+      }
+
+      await analyzeBlob(selectedFile, selectedFile.name || "upload.jpg");
+    });
+
+    capturePiButton.addEventListener("click", async () => {
+      const shouldResumePreview = previewActive;
+      try {
+        if (countdownRunning) {
+          return;
+        }
+        setBusyState(true);
+        clearResults();
+        if (!previewActive) {
+          startPiPreview();
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
+        if (previewActive) {
+          stopPiPreview();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        setStatus("撮影を開始しました。カウントのあいだ顔を中央でキープしてください。", false);
+
+        const captureRequest = fetch("/api/capture-pi-camera/", {
+          method: "POST",
+          body: (() => {
+            const formData = new FormData();
+            formData.append("feature_mode", getSelectedFeatureMode());
+            return formData;
+          })(),
+        });
+        const countdownRequest = runCountdown(5);
+
+        const response = await captureRequest;
+        const rawText = await response.text();
+        let payload = {};
+
+        if (rawText) {
+          try {
+            payload = JSON.parse(rawText);
+          } catch {
+            payload = { error: rawText.slice(0, 400) };
+          }
+        } else {
+          payload = { error: "サーバーから空のレスポンスが返りました。" };
+        }
+
+        await countdownRequest;
+
+        if (!response.ok) {
+          throw new Error(payload.error || "ラズパイカメラ撮影に失敗しました。");
+        }
+
+        renderAnalysisResult(payload, "ラズパイカメラ撮影と解析が完了しました。");
+        if (shouldResumePreview) {
+          startPiPreview();
+        }
+      } catch (error) {
+        countdownOverlay.textContent = "";
+        countdownOverlay.hidden = true;
+        countdownRunning = false;
+        clearResults();
+        setBusyState(false);
+        setStatus(error && error.message ? error.message : "ラズパイカメラ撮影に失敗しました。", true);
+      } finally {
+        setBusyState(false);
+        if (shouldResumePreview && !previewActive) {
+          startPiPreview();
+        }
+      }
+    });
+
+    resetAll();
+  </script>
+</body>
+</html>

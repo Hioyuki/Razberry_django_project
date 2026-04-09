@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="28" fill="#fbcfe8"/>
+  <circle cx="120" cy="122" r="78" fill="#f9a8d4"/>
+  <circle cx="94" cy="112" r="14" fill="#1d4ed8"/>
+  <circle cx="146" cy="112" r="14" fill="#1d4ed8"/>
+  <circle cx="94" cy="112" r="6" fill="#fff"/>
+  <circle cx="146" cy="112" r="6" fill="#fff"/>
+  <path d="M104 150c10 8 22 8 32 0" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+  <path d="M120 54c8-18 26-18 34-4-6 6-18 14-34 16z" fill="#ec4899"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="sans-serif" fill="#111827">プリン</text>
+</svg>

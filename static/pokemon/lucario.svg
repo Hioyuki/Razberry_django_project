@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="28" fill="#dbeafe"/>
+  <path d="M72 162l18-84 30-22 30 22 18 84z" fill="#2563eb"/>
+  <path d="M100 88l20-22 20 22-20 28z" fill="#111827"/>
+  <circle cx="98" cy="118" r="7" fill="#111827"/>
+  <circle cx="142" cy="118" r="7" fill="#111827"/>
+  <path d="M104 146c8 6 24 6 32 0" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+  <path d="M96 78l-24-28 18 4 18 20z" fill="#111827"/>
+  <path d="M144 78l24-28-18 4-18 20z" fill="#111827"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="sans-serif" fill="#111827">ルカリオ</text>
+</svg>

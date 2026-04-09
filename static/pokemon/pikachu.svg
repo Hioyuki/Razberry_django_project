@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="28" fill="#fde047"/>
+  <circle cx="120" cy="120" r="76" fill="#facc15"/>
+  <circle cx="92" cy="112" r="8" fill="#111827"/>
+  <circle cx="148" cy="112" r="8" fill="#111827"/>
+  <circle cx="82" cy="146" r="14" fill="#ef4444"/>
+  <circle cx="158" cy="146" r="14" fill="#ef4444"/>
+  <path d="M96 154c7 10 41 10 48 0" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/>
+  <path d="M74 56l-18-30 30 14" fill="#111827"/>
+  <path d="M166 56l18-30-30 14" fill="#111827"/>
+  <text x="120" y="214" text-anchor="middle" font-size="24" font-family="sans-serif" fill="#111827">ピカチュウ</text>
+</svg>
