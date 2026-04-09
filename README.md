@@ -1,1 +1,0 @@
-# Razberry_django_project
