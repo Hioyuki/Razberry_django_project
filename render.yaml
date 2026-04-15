@@ -2,6 +2,7 @@ services:
   - type: web
     name: razberry-django-project
     runtime: python
+    plan: free
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --no-input
