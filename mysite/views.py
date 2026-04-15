@@ -9,7 +9,12 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from .face_service import FaceServiceError, get_default_face_service
+
+def _get_face_service_objects():
+    # Delay heavy imports so the home page can still boot on constrained hosts.
+    from .face_service import FaceServiceError, get_default_face_service
+
+    return FaceServiceError, get_default_face_service
 
 
 @require_GET
@@ -25,6 +30,7 @@ def analyze_face(request):
     if upload is None:
         return JsonResponse({"error": "画像ファイル `image` を送ってください。"}, status=400)
 
+    FaceServiceError, get_default_face_service = _get_face_service_objects()
     service = get_default_face_service()
     try:
         result = service.analyze(upload.read(), feature_mode=feature_mode)
@@ -42,6 +48,7 @@ def analyze_face(request):
 @csrf_exempt
 @require_POST
 def capture_pi_camera(request):
+    FaceServiceError, get_default_face_service = _get_face_service_objects()
     service = get_default_face_service()
     feature_mode = request.POST.get("feature_mode", "pokemon")
 
